@@ -7,3 +7,56 @@ body {
   padding: 0;
   background: none;
 }
+/* Target the main popup container */
+.custom-popup .leaflet-popup-content-wrapper {
+  background: #161b27 !important; /* Matches your dashboard dark blue */
+  color: #f1f5f9 !important;
+  border-radius: 8px;
+  padding: 0;
+  border: 1px solid #1e293b; /* Optional: adds a subtle border */
+}
+
+/* Target the little triangle at the bottom */
+.custom-popup .leaflet-popup-tip {
+  background: #161b27 !important;
+  border: 1px solid #1e293b;
+}
+
+/* Remove the default padding Leaflet adds to the content */
+.custom-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+
+/* Style the 'X' close button to be more subtle */
+.custom-popup .leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding-top: 4px !important;
+}
+/* ── Strip Leaflet's default popup chrome ── */
+.leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.leaflet-popup-tip-container {
+  display: none !important;
+}
+/* ── Hide sidebar scrollbar ── */
+aside::-webkit-scrollbar {
+  display: none;
+}
+
+aside {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
