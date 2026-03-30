@@ -1,17 +1,25 @@
+import { useState } from "react";
 import Layout from "../components/Layout";
-import useLocations from "../hooks/useLocations";
-import useAppStore from "../store/useAppStore";
+import SplashScreen from "../components/SplashScreen";
 
 const Dashboard = () => {
-  useLocations();
+  const [splashDone, setSplashDone] = useState(false);
 
-  const { locations, loading, error } = useAppStore();
-
-  console.log("locations:", locations);
-  console.log("loading:", loading);
-  console.log("error:", error);
-
-  return <Layout />;
+  return (
+    <>
+      {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
+      <div
+        style={{
+          opacity: splashDone ? 1 : 0,
+          transition: "opacity 0.5s ease",
+          height: "100vh",
+          width: "100vw",
+        }}
+      >
+        <Layout />
+      </div>
+    </>
+  );
 };
 
 export default Dashboard;

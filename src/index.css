@@ -60,3 +60,60 @@ aside {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+/* ── Leaflet popup chrome reset ────────────────────────────────────────────── */
+.leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+.leaflet-popup-tip-container {
+  display: none !important;
+}
+
+/* ── Hide sidebar scrollbar ────────────────────────────────────────────────── */
+aside::-webkit-scrollbar {
+  display: none;
+}
+aside {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Shimmer animation ─────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Pulse rings (splash logo) ─────────────────────────────────────────────── */
+@keyframes pulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* ── Spinner ───────────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Orbitron font for GERD brand mark ─────────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap");

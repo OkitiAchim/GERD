@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useNavigate } from "react-router-dom";
 import useAppStore from "../store/useAppStore";
 import { createColoredMarker, heatWeight } from "../utils/mapMarkers";
 import MapLegend from "./MapLegend";
@@ -173,6 +174,7 @@ const LayerToggle = ({ showHeatmap, onToggle }) => (
 const MapView = () => {
   const { locations, loading, setSelectedLocation } = useAppStore();
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -258,6 +260,7 @@ const MapView = () => {
                     minWidth: "200px",
                   }}
                 >
+                  {/* Name + badge */}
                   <div
                     style={{
                       display: "flex",
@@ -292,6 +295,7 @@ const MapView = () => {
                     </span>
                   </div>
 
+                  {/* Data rows */}
                   {[
                     ["Region", location.region],
                     ["Pollution index", location.pollutionIndex],
@@ -322,6 +326,7 @@ const MapView = () => {
                     </div>
                   ))}
 
+                  {/* Action — navigates to detail page */}
                   <div
                     style={{
                       borderTop: "1px solid rgba(255,255,255,0.06)",
@@ -330,7 +335,7 @@ const MapView = () => {
                     }}
                   >
                     <button
-                      onClick={() => setSelectedLocation(location)}
+                      onClick={() => navigate(`/location/${location.id}`)}
                       style={{
                         background: "none",
                         border: "none",

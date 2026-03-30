@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import MapView from "./mapView";
 import FilterPanel from "./FilterPanel";
+import { PulseLogo } from "./SplashScreen";
+import { SidebarSkeleton, AnalyticsStripSkeleton } from "./SkeletonLoaders";
 import {
   LayoutDashboard,
   MapPin,
@@ -13,15 +16,14 @@ import {
   X,
 } from "lucide-react";
 import useAppStore from "../store/useAppStore";
-import { mockLocations } from "../data/mockLocations";
+import useLocations from "../hooks/useLocations";
 
-// ─── Breakpoints ──────────────────────────────────────────────────────────────
+// ─── Breakpoint hook ──────────────────────────────────────────────────────────
 const useBreakpoint = () => {
   const [bp, setBp] = useState(() => {
     const w = window.innerWidth;
     return w < 768 ? "mobile" : w < 1024 ? "tablet" : "desktop";
   });
-
   useEffect(() => {
     const handler = () => {
       const w = window.innerWidth;
@@ -30,54 +32,57 @@ const useBreakpoint = () => {
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
-
   return bp;
 };
 
-// ─── Sidebar widths per breakpoint ───────────────────────────────────────────
-const sidebarWidth = { mobile: "100%", tablet: "200px", desktop: "256px" };
-
 // ─── Nav item ─────────────────────────────────────────────────────────────────
-const NavItem = ({ icon: Icon, label, active = false, compact = false }) => (
-  <button
-    style={{
-      width: "100%",
-      display: "flex",
-      alignItems: "center",
-      gap: compact ? "0" : "10px",
-      justifyContent: compact ? "center" : "flex-start",
-      padding: compact ? "8px" : "7px 10px",
-      borderRadius: "7px",
-      marginBottom: "2px",
-      border: active
-        ? "1px solid rgba(56,189,248,0.15)"
-        : "1px solid transparent",
-      background: active ? "rgba(56,189,248,0.08)" : "transparent",
-      color: active ? "#38bdf8" : "#475569",
-      fontSize: "13px",
-      cursor: "pointer",
-      transition: "all 0.15s ease",
-    }}
-  >
-    <Icon size={14} strokeWidth={1.8} />
-    {!compact && (
-      <span style={{ fontWeight: active ? 500 : 400 }}>{label}</span>
-    )}
-    {!compact && active && (
-      <ChevronRight size={12} style={{ marginLeft: "auto", opacity: 0.4 }} />
-    )}
-  </button>
-);
+const NavItem = ({ icon: Icon, label, to = "/", compact = false }) => {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const active = pathname === to;
+
+  return (
+    <button
+      onClick={() => navigate(to)}
+      style={{
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        gap: compact ? "0" : "10px",
+        justifyContent: compact ? "center" : "flex-start",
+        padding: compact ? "8px" : "7px 10px",
+        borderRadius: "7px",
+        marginBottom: "2px",
+        border: active
+          ? "1px solid rgba(56,189,248,0.15)"
+          : "1px solid transparent",
+        background: active ? "rgba(56,189,248,0.08)" : "transparent",
+        color: active ? "#38bdf8" : "#475569",
+        fontSize: "13px",
+        cursor: "pointer",
+        transition: "all 0.15s ease",
+      }}
+    >
+      <Icon size={14} strokeWidth={1.8} />
+      {!compact && (
+        <span style={{ fontWeight: active ? 500 : 400 }}>{label}</span>
+      )}
+      {!compact && active && (
+        <ChevronRight size={12} style={{ marginLeft: "auto", opacity: 0.4 }} />
+      )}
+    </button>
+  );
+};
 
 // ─── Stat chip ────────────────────────────────────────────────────────────────
 const StatChip = ({ label, value, color, compact }) => (
   <div
     style={{
       display: "flex",
-      justifyContent: compact ? "center" : "space-between",
       alignItems: "center",
       padding: "7px 0",
       borderBottom: "1px solid rgba(255,255,255,0.04)",
+      justifyContent: compact ? "center" : "space-between",
       flexDirection: compact ? "column" : "row",
       gap: compact ? "2px" : "0",
     }}
@@ -96,47 +101,92 @@ const StatChip = ({ label, value, color, compact }) => (
       {value}
     </span>
     {compact && (
-      <span
-        style={{ fontSize: "9px", color: "#1e293b", letterSpacing: "0.04em" }}
-      >
-        {label}
-      </span>
+      <span style={{ fontSize: "9px", color: "#1e293b" }}>{label}</span>
     )}
   </div>
 );
 
+// ─── Analytics strip ──────────────────────────────────────────────────────────
+const AnalyticsStrip = () => {
+  const { locations, _allLocations, loading } = useAppStore();
+
+  if (loading) return <AnalyticsStripSkeleton />;
+
+  const avg = locations.length
+    ? (
+        locations.reduce((s, l) => s + l.pollutionIndex, 0) / locations.length
+      ).toFixed(1)
+    : "—";
+
+  const worst = locations.length
+    ? locations.reduce((a, b) => (a.pollutionIndex > b.pollutionIndex ? a : b))
+    : null;
+
+  const pill = (label, value, color = "#64748b") => (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+        flexShrink: 0,
+      }}
+    >
+      <span style={{ fontSize: "11px", color: "#334155" }}>{label}</span>
+      <span
+        style={{
+          fontSize: "11px",
+          fontWeight: 600,
+          color,
+          fontVariantNumeric: "tabular-nums",
+          background: `${color}14`,
+          border: `1px solid ${color}30`,
+          borderRadius: "4px",
+          padding: "1px 6px",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+
+  return (
+    <>
+      <Activity size={12} color="#334155" style={{ flexShrink: 0 }} />
+      {pill("Visible", `${locations.length} / ${_allLocations.length}`)}
+      {pill("Avg pollution", avg, "#f59e0b")}
+      {worst && pill("Highest risk", worst.name, "#ef4444")}
+    </>
+  );
+};
+
 // ─── Layout ───────────────────────────────────────────────────────────────────
 const Layout = () => {
-  const { setLocations, getStats } = useAppStore();
+  const { getStats, loading } = useAppStore();
   const stats = getStats();
   const bp = useBreakpoint();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useLocations();
+
   const isMobile = bp === "mobile";
   const isTablet = bp === "tablet";
-  const isDesktop = bp === "desktop";
-  const compact = isTablet; // compact sidebar mode
+  const compact = isTablet;
 
   useEffect(() => {
-    setLocations(mockLocations);
-  }, [setLocations]);
-
-  // Close sidebar on breakpoint change to desktop
-  useEffect(() => {
-    if (isDesktop) setSidebarOpen(false);
-  }, [isDesktop]);
+    if (bp === "desktop") setSidebarOpen(false);
+  }, [bp]);
 
   const sidebar = (
     <aside
       style={{
-        width: isMobile ? "280px" : sidebarWidth[bp],
+        width: isMobile ? "280px" : isTablet ? "200px" : "256px",
         background: "#111827",
         borderRight: "1px solid rgba(255,255,255,0.06)",
         display: "flex",
         flexDirection: "column",
         flexShrink: 0,
         overflowY: "auto",
-        // Mobile: slide in as overlay
+        scrollbarWidth: "none",
         ...(isMobile
           ? {
               position: "fixed",
@@ -151,10 +201,10 @@ const Layout = () => {
           : {}),
       }}
     >
-      {/* Brand */}
+      {/* ── Brand mark ── */}
       <div
         style={{
-          padding: "16px",
+          padding: "14px 16px",
           borderBottom: "1px solid rgba(255,255,255,0.05)",
           display: "flex",
           alignItems: "center",
@@ -162,44 +212,36 @@ const Layout = () => {
           justifyContent: compact ? "center" : "flex-start",
         }}
       >
-        <div
-          style={{
-            width: "30px",
-            height: "30px",
-            background: "linear-gradient(135deg, #0ea5e9, #6366f1)",
-            borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <MapPin size={14} color="#fff" strokeWidth={2} />
-        </div>
+        <PulseLogo size={32} animate={false} />
+
         {!compact && (
-          <div>
+          <div style={{ lineHeight: 1 }}>
             <div
               style={{
-                fontSize: "13px",
-                fontWeight: 600,
+                fontFamily: "'Orbitron', sans-serif",
+                fontWeight: 700,
+                fontSize: "15px",
+                letterSpacing: "0.2em",
                 color: "#f1f5f9",
-                lineHeight: 1.2,
+                textShadow: "0 0 20px rgba(56,189,248,0.25)",
               }}
             >
-              GeoRisk
+              GERD
             </div>
             <div
               style={{
-                fontSize: "10px",
-                color: "#334155",
-                letterSpacing: "0.05em",
+                fontSize: "9px",
+                color: "#64748b",
+                letterSpacing: "0.08em",
+                marginTop: "3px",
+                textTransform: "uppercase",
               }}
             >
-              ENVIRONMENTAL DASHBOARD
+              Environmental Risk Dashboard
             </div>
           </div>
         )}
-        {/* Mobile close button */}
+
         {isMobile && (
           <button
             onClick={() => setSidebarOpen(false)}
@@ -217,18 +259,38 @@ const Layout = () => {
         )}
       </div>
 
-      {/* Nav */}
+      {/* ── Nav ── */}
       <nav style={{ padding: "12px 10px" }}>
         <NavItem
           icon={LayoutDashboard}
           label="Overview"
-          active
+          to="/"
           compact={compact}
         />
-        <NavItem icon={MapPin} label="Locations" compact={compact} />
-        <NavItem icon={Activity} label="Analytics" compact={compact} />
-        <NavItem icon={SlidersHorizontal} label="Filters" compact={compact} />
-        <NavItem icon={Settings} label="Settings" compact={compact} />
+        <NavItem
+          icon={MapPin}
+          label="Locations"
+          to="/locations"
+          compact={compact}
+        />
+        <NavItem
+          icon={Activity}
+          label="Analytics"
+          to="/analytics"
+          compact={compact}
+        />
+        <NavItem
+          icon={SlidersHorizontal}
+          label="Filters"
+          to="/filters"
+          compact={compact}
+        />
+        <NavItem
+          icon={Settings}
+          label="Settings"
+          to="/settings"
+          compact={compact}
+        />
       </nav>
 
       <div
@@ -239,48 +301,52 @@ const Layout = () => {
         }}
       />
 
-      {/* Stats */}
-      <div style={{ padding: "14px 16px" }}>
-        {!compact && (
-          <div
-            style={{
-              fontSize: "10px",
-              fontWeight: 600,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "#334155",
-              marginBottom: "6px",
-            }}
-          >
-            Quick stats
-          </div>
-        )}
-        <StatChip label="Total" value={stats.total} compact={compact} />
-        <StatChip
-          label="Critical"
-          value={stats.critical}
-          color="#ef4444"
-          compact={compact}
-        />
-        <StatChip
-          label="High"
-          value={stats.high}
-          color="#f59e0b"
-          compact={compact}
-        />
-        <StatChip
-          label="Moderate"
-          value={stats.moderate}
-          color="#3b82f6"
-          compact={compact}
-        />
-        <StatChip
-          label="Low"
-          value={stats.low}
-          color="#22c55e"
-          compact={compact}
-        />
-      </div>
+      {/* ── Stats — skeleton while loading ── */}
+      {loading ? (
+        <SidebarSkeleton />
+      ) : (
+        <div style={{ padding: "14px 16px" }}>
+          {!compact && (
+            <div
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "#334155",
+                marginBottom: "6px",
+              }}
+            >
+              Quick stats
+            </div>
+          )}
+          <StatChip label="Total" value={stats.total} compact={compact} />
+          <StatChip
+            label="Critical"
+            value={stats.critical}
+            color="#ef4444"
+            compact={compact}
+          />
+          <StatChip
+            label="High"
+            value={stats.high}
+            color="#f59e0b"
+            compact={compact}
+          />
+          <StatChip
+            label="Moderate"
+            value={stats.moderate}
+            color="#3b82f6"
+            compact={compact}
+          />
+          <StatChip
+            label="Low"
+            value={stats.low}
+            color="#22c55e"
+            compact={compact}
+          />
+        </div>
+      )}
 
       <div
         style={{
@@ -290,7 +356,7 @@ const Layout = () => {
         }}
       />
 
-      {/* Filter panel — hidden in compact/tablet mode to save space */}
+      {/* ── Filters ── */}
       {!compact && (
         <div style={{ padding: "14px 16px", flex: 1 }}>
           <FilterPanel />
@@ -310,7 +376,6 @@ const Layout = () => {
         fontFamily: "'DM Sans', sans-serif",
       }}
     >
-      {/* Mobile backdrop */}
       {isMobile && sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
@@ -326,7 +391,6 @@ const Layout = () => {
 
       {sidebar}
 
-      {/* Main */}
       <main
         style={{
           flex: 1,
@@ -349,7 +413,6 @@ const Layout = () => {
             flexShrink: 0,
           }}
         >
-          {/* Hamburger — mobile only */}
           {isMobile && (
             <button
               onClick={() => setSidebarOpen(true)}
@@ -384,7 +447,6 @@ const Layout = () => {
             </span>
           </div>
 
-          {/* Live badge */}
           <div
             style={{
               display: "flex",
@@ -444,14 +506,12 @@ const Layout = () => {
             display: "flex",
             alignItems: "center",
             padding: "0 20px",
-            gap: "8px",
+            gap: "20px",
             flexShrink: 0,
+            overflowX: "auto",
           }}
         >
-          <Activity size={12} color="#1e293b" />
-          <span style={{ fontSize: "11px", color: "#1e293b" }}>
-            Analytics panel — Day 5
-          </span>
+          <AnalyticsStrip />
         </div>
       </main>
     </div>
