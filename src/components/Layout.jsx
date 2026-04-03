@@ -231,7 +231,7 @@ const Layout = () => {
             <div
               style={{
                 fontSize: "9px",
-                color: "#64748b",
+                color: "#94a3b8",
                 letterSpacing: "0.08em",
                 marginTop: "3px",
                 textTransform: "uppercase",
@@ -436,7 +436,7 @@ const Layout = () => {
               flex: 1,
             }}
           >
-            <span style={{ fontSize: "12px", color: "#334155" }}>
+            <span style={{ fontSize: "12px", color: "#94a3b8" }}>
               Dashboard
             </span>
             <ChevronRight size={11} color="#1e293b" />

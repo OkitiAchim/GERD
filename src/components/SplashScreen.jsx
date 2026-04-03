@@ -159,7 +159,7 @@ const SplashScreen = ({ onComplete }) => {
           fontSize: "11px",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "#334155",
+          color: "#64748b",
           opacity: showSubtitle ? 1 : 0,
           transform: showSubtitle ? "translateY(0)" : "translateY(6px)",
           transition: "opacity 0.4s ease, transform 0.4s ease",
