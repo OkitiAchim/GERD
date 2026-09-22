@@ -1,7 +1,7 @@
-/* ── Fonts — must be first ─────────────────────────────────────────────────── */
+/* ── Fonts — must be first */
 @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap");
 
-/* ── Tailwind ──────────────────────────────────────────────────────────────── */
+/* ── Tailwind  */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,7 +16,7 @@ body,
   height: 100%;
 }
 
-/* ── Hide sidebar scrollbar ────────────────────────────────────────────────── */
+/* ── Hide sidebar scrollbar */
 aside::-webkit-scrollbar {
   display: none;
 }
@@ -25,7 +25,7 @@ aside {
   scrollbar-width: none;
 }
 
-/* ── Leaflet popup chrome reset ────────────────────────────────────────────── */
+/* ── Leaflet popup chrome reset */
 .leaflet-popup-content-wrapper {
   background: transparent !important;
   border: none !important;

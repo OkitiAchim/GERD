@@ -81,7 +81,7 @@ const MapLegend = () => (
         marginTop: "8px",
         paddingTop: "8px",
         fontSize: "10px",
-        color: "#1e293b",
+        color: "#515d6fff",
       }}
     >
       Click a marker for details

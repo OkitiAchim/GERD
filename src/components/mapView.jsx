@@ -6,6 +6,8 @@ import { createColoredMarker, heatWeight } from "../utils/mapMarkers";
 import MapLegend from "./MapLegend";
 import "../utils/leafletIconFix";
 
+const cartoApiKey = import.meta.env.VITE_CARTO_API_KEY;
+
 // ─── Risk badge colors ────────────────────────────────────────────────────────
 const riskColor = {
   low: "#22c55e",
@@ -13,6 +15,7 @@ const riskColor = {
   high: "#f59e0b",
   critical: "#ef4444",
 };
+
 const riskLabel = {
   low: "Low",
   moderate: "Moderate",
@@ -23,11 +26,15 @@ const riskLabel = {
 // ─── Auto-fit bounds ──────────────────────────────────────────────────────────
 const FitBounds = ({ locations }) => {
   const map = useMap();
+
   useEffect(() => {
     if (locations.length === 0) return;
+
     const bounds = locations.map((l) => [l.coordinates.lat, l.coordinates.lng]);
+
     map.fitBounds(bounds, { padding: [48, 48] });
   }, [locations, map]);
+
   return null;
 };
 
@@ -42,6 +49,7 @@ const HeatmapLayer = ({ locations, visible }) => {
         map.removeLayer(layerRef.current);
         layerRef.current = null;
       }
+
       if (!visible || locations.length === 0) return;
 
       const points = locations.map((l) => [
@@ -224,6 +232,7 @@ const MapView = () => {
       )}
 
       <MapLegend showHeatmap={showHeatmap} />
+
       <LayerToggle
         showHeatmap={showHeatmap}
         onToggle={(m) => setShowHeatmap(m === "heatmap")}
@@ -232,14 +241,20 @@ const MapView = () => {
       <MapContainer
         center={[9.082, 8.6753]}
         zoom={6}
-        style={{ height: "100%", width: "100%", background: "#0d1520" }}
+        style={{
+          height: "100%",
+          width: "100%",
+          background: "#0d1520",
+        }}
         zoomControl={false}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url={`https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png?key=${cartoApiKey}`}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         />
+
         <FitBounds locations={locations} />
+
         <HeatmapLayer locations={locations} visible={showHeatmap} />
 
         {!showHeatmap &&
@@ -248,7 +263,9 @@ const MapView = () => {
               key={location.id}
               position={[location.coordinates.lat, location.coordinates.lng]}
               icon={createColoredMarker(location.riskLevel)}
-              eventHandlers={{ click: () => setSelectedLocation(location) }}
+              eventHandlers={{
+                click: () => setSelectedLocation(location),
+              }}
             >
               <Popup className="geo-popup" closeButton={false} offset={[0, -6]}>
                 <div
@@ -278,6 +295,7 @@ const MapView = () => {
                     >
                       {location.name}
                     </span>
+
                     <span
                       style={{
                         fontSize: "10px",
@@ -285,8 +303,12 @@ const MapView = () => {
                         letterSpacing: "0.06em",
                         textTransform: "uppercase",
                         color: riskColor[location.riskLevel] ?? "#94a3b8",
-                        background: `${riskColor[location.riskLevel] ?? "#94a3b8"}18`,
-                        border: `1px solid ${riskColor[location.riskLevel] ?? "#94a3b8"}40`,
+                        background: `${
+                          riskColor[location.riskLevel] ?? "#94a3b8"
+                        }18`,
+                        border: `1px solid ${
+                          riskColor[location.riskLevel] ?? "#94a3b8"
+                        }40`,
                         borderRadius: "4px",
                         padding: "2px 6px",
                       }}
@@ -311,9 +333,15 @@ const MapView = () => {
                         marginBottom: "5px",
                       }}
                     >
-                      <span style={{ fontSize: "11px", color: "#64748b" }}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#64748b",
+                        }}
+                      >
                         {label}
                       </span>
+
                       <span
                         style={{
                           fontSize: "11px",
